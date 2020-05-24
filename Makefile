@@ -67,13 +67,14 @@ deploy.booking: ##=> Deploy booking service using SAM
 				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
-deploy.api-lambda-stripe-charge: ##=> Deploy payment service using SAM
+deploy.paymentapi: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
 	cd src/backend/api-lambda-stripe-charge && \
-	    npm prepack && \
-		npm prepackage && \
-		npm package && \
-		npm deploy
+	    npm install && \
+		npm run prepack && \
+		npm run prepackage && \
+		npm run package && \
+		npm run deploy
 			
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
