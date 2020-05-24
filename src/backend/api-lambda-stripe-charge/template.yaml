@@ -113,12 +113,20 @@ Outputs:
   ChargeApiUrl:
     Value: !Sub https://${ChargeStripeApiWebhook}.execute-api.${AWS::Region}.amazonaws.com/prod/charge
     Description: The URL of the API Gateway you provide to Stripe as a webhook it invokes to CREATE a charge based on its token.
+    Export:
+      Name: ChargeApiUrl
   CaptureApiUrl:
     Value: !Sub https://${ChargeStripeApiWebhook}.execute-api.${AWS::Region}.amazonaws.com/prod/capture
     Description: The URL of the API Gateway you provide to Stripe as a webhook it invokes to CAPTURE a charge based on its token.
+    Export:
+      Name: CaptureApiUrl
   RefundApiUrl:
     Value: !Sub https://${ChargeStripeApiWebhook}.execute-api.${AWS::Region}.amazonaws.com/prod/refund
     Description: The URL of the API Gateway you provide to Stripe as a webhook it invokes to CAPTURE a charge based on its token.
+    Export:
+      Name: RefundApiUrl
   SNSTopic:
     Value: !Ref SNSTopic
     Description: The SNS topic your Stripe Lambda is notifying to
+    Export:
+      Name: SNSTopic

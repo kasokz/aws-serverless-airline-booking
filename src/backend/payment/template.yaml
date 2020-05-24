@@ -27,7 +27,7 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.CaptureApiUrl
+          PAYMENT_API_URL: !ImportValue CaptureApiUrl
           STAGE: !Ref Stage
 
   RefundPayment:
@@ -40,7 +40,7 @@ Resources:
       Timeout: 10
       Environment:
         Variables:
-          PAYMENT_API_URL: !GetAtt StripePaymentApplication.Outputs.RefundApiUrl
+          PAYMENT_API_URL: !ImportValue RefundApiUrl
           STAGE: !Ref Stage
 
   CollectPaymentParameter:
@@ -64,21 +64,21 @@ Resources:
     Properties:
       Name: !Sub "/${Stage}/service/payment/api/capture/url"
       Type: String
-      Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
+      Value: !ImportValue CaptureApiUrl
 
   PaymentChargeEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub "/${Stage}/service/payment/api/charge/url"
       Type: String
-      Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+      Value: !ImportValue ChargeApiUrl
 
   PaymentRefundEndpointParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub "/${Stage}/service/payment/api/refund/url"
       Type: String
-      Value: !Sub ${StripePaymentApplication.Outputs.RefundApiUrl}
+      Value: !ImportValue RefundApiUrl
 
 
 Outputs:
@@ -91,13 +91,13 @@ Outputs:
     Description: Refund Payment Lambda Function
 
   PaymentCaptureUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.CaptureApiUrl}
+    Value: !ImportValue CaptureApiUrl
     Description: Payment Endpoint for capturing payments
 
   PaymentChargeUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.ChargeApiUrl}
+    Value: !ImportValue ChargeApiUrl
     Description: Payment Endpoint for collecting payments
 
   RefundApiUrl:
-    Value: !Sub ${StripePaymentApplication.Outputs.RefundApiUrl}
+    Value: !ImportValue RefundApiUrl
     Description: Payment Endpoint for refunding payments
