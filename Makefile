@@ -70,7 +70,7 @@ deploy.booking: ##=> Deploy booking service using SAM
 deploy.paymentapi: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
 	cd src/backend/api-lambda-stripe-charge && \
-	    sed -i "s@app-repo-components@$$${DEPLOYMENT_BUCKET_NAME}@g" package.json && \
+	    sed -i "s@app-repo-components@$${DEPLOYMENT_BUCKET_NAME}@g" package.json && \
 		cat package.json && \
 	    npm install && \
 		npm run prepack && \
