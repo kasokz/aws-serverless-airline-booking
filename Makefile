@@ -20,12 +20,14 @@ init: ##=> Install OS deps and dev tools
 
 deploy: ##=> Deploy services
 	$(info [*] Deploying...)
+	$(MAKE) deploy.paymentapi
 	$(MAKE) deploy.payment
 	$(MAKE) deploy.booking
 	$(MAKE) deploy.loyalty
 	$(MAKE) deploy.log-processing
 
 delete: ##=> Delete services
+	$(MAKE) delete.paymentapi
 	$(MAKE) delete.booking
 	$(MAKE) delete.payment
 	$(MAKE) delete.loyalty
@@ -34,6 +36,9 @@ delete: ##=> Delete services
 delete.booking: ##=> Delete booking service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-booking-$${AWS_BRANCH}
 
+delete.paymentapi: ##=> Delete payment service
+	aws cloudformation delete-stack --stack-name api-lambda-stripe-charge
+	
 delete.payment: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
 
@@ -62,6 +67,14 @@ deploy.booking: ##=> Deploy booking service using SAM
 				AppsyncApiId=/$${AWS_BRANCH}/service/amplify/api/id \
 				Stage=$${AWS_BRANCH}
 
+deploy.api-lambda-stripe-charge: ##=> Deploy payment service using SAM
+	$(info [*] Packaging and deploying Payment service...)
+	cd src/backend/api-lambda-stripe-charge && \
+	    npm prepack && \
+		npm prepackage && \
+		npm package && \
+		npm deploy
+			
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
 	cd src/backend/payment && \
