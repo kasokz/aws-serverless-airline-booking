@@ -13,9 +13,17 @@ Parameters:
     Default: "'*'"
     Description: (Optional) Cross-origin resource sharing (CORS) Origin. You can specify a single origin, all "*" or leave empty and no CORS will be applied.
     MaxLength: 250
-  SSMParameterPath:
+  SSMParameterPath1:
     Type: String
-    Default: 'lambda-stripe-charge/stripe-secret-key'
+    Default: 'lambda-stripe-charge/stripe-secret-key1'
+    Description: >
+      This component assumes the Stripe Secret key needed to use the Stripe Charge API is stored as SecureStrings in SSM Parameter Store under the path defined by
+      this parameter. See the component README for details.
+    AllowedPattern: ^[0-9a-zA-Z-][0-9a-zA-Z-\/]+
+    ConstraintDescription: 'Must start with a slash and alphanumeric characters (exclude the starting slash)'
+  SSMParameterPath2:
+    Type: String
+    Default: 'lambda-stripe-charge/stripe-secret-key2'
     Description: >
       This component assumes the Stripe Secret key needed to use the Stripe Charge API is stored as SecureStrings in SSM Parameter Store under the path defined by
       this parameter. See the component README for details.
