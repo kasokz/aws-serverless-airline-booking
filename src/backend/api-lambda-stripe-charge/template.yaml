@@ -57,6 +57,7 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath1
+        - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
@@ -82,6 +83,7 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath1
+        - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
@@ -106,6 +108,7 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath1
+        - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
