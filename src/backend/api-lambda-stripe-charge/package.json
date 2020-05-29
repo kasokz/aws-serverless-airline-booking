@@ -8,7 +8,7 @@
     "prepack": "npm install --production",
     "prepackage": "tsc",
     "package": "aws cloudformation package --template-file template.yaml --output-template-file output.yaml --s3-bucket app-repo-components",
-    "deploy": "aws cloudformation deploy --template-file output.yaml --stack-name api-lambda-stripe-charge --capabilities CAPABILITY_IAM --parameter-overrides SSMParameterPath=lambda-stripe-charge/stripe-secret-key EnableInstantCapture=false",
+    "deploy": "aws cloudformation deploy --template-file output.yaml --stack-name api-lambda-stripe-charge --capabilities CAPABILITY_IAM EnableInstantCapture=false",
     "describe": "aws cloudformation describe-stacks --stack-name api-lambda-stripe-charge --query Stacks[].Outputs[].OutputValue --output text",
     "qd": "npm run prepack && npm run package && npm run deploy && npm run describe"
   },
