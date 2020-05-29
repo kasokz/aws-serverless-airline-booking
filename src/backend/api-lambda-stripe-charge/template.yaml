@@ -56,12 +56,14 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath
+            ParameterName: !Ref SSMParameterPath1
+            ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH: !Ref SSMParameterPath
+          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
+          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
           TOPIC_ARN: !Ref SNSTopic
           IS_CAPTURE: !Ref EnableInstantCapture
       Events:
@@ -79,12 +81,14 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath
+            ParameterName: !Ref SSMParameterPath1
+            ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH: !Ref SSMParameterPath
+          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
+          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
           TOPIC_ARN: !Ref SNSTopic
       Events:
         Api:
@@ -101,12 +105,14 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath
+            ParameterName: !Ref SSMParameterPath1
+            ParameterName: !Ref SSMParameterPath2
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH: !Ref SSMParameterPath
+          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
+          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
           TOPIC_ARN: !Ref SNSTopic
       Events:
         Api:
