@@ -13,17 +13,9 @@ Parameters:
     Default: "'*'"
     Description: (Optional) Cross-origin resource sharing (CORS) Origin. You can specify a single origin, all "*" or leave empty and no CORS will be applied.
     MaxLength: 250
-  SSMParameterPath1:
+  SSMParameterPath:
     Type: String
-    Default: 'lambda-stripe-charge/stripe-secret-key1'
-    Description: >
-      This component assumes the Stripe Secret key needed to use the Stripe Charge API is stored as SecureStrings in SSM Parameter Store under the path defined by
-      this parameter. See the component README for details.
-    AllowedPattern: ^[0-9a-zA-Z-][0-9a-zA-Z-\/]+
-    ConstraintDescription: 'Must start with a slash and alphanumeric characters (exclude the starting slash)'
-  SSMParameterPath2:
-    Type: String
-    Default: 'lambda-stripe-charge/stripe-secret-key2'
+    Default: 'lambda-stripe-charge/stripe-secret-keys'
     Description: >
       This component assumes the Stripe Secret key needed to use the Stripe Charge API is stored as SecureStrings in SSM Parameter Store under the path defined by
       this parameter. See the component README for details.
@@ -56,15 +48,12 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath1
-        - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath2
+            ParameterName: !Ref SSMParameterPath
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
-          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
+          SSM_PARAMETER_PATH: !Ref SSMParameterPath
           TOPIC_ARN: !Ref SNSTopic
           IS_CAPTURE: !Ref EnableInstantCapture
       Events:
@@ -82,15 +71,12 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath1
-        - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath2
+            ParameterName: !Ref SSMParameterPath
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
-          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
+          SSM_PARAMETER_PATH: !Ref SSMParameterPath
           TOPIC_ARN: !Ref SNSTopic
       Events:
         Api:
@@ -107,15 +93,12 @@ Resources:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath1
-        - SSMParameterReadPolicy:
-            ParameterName: !Ref SSMParameterPath2
+            ParameterName: !Ref SSMParameterPath
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
           CORS_ORIGIN: !Ref CorsOrigin
-          SSM_PARAMETER_PATH1: !Ref SSMParameterPath1
-          SSM_PARAMETER_PATH2: !Ref SSMParameterPath2
+          SSM_PARAMETER_PATH: !Ref SSMParameterPath
           TOPIC_ARN: !Ref SNSTopic
       Events:
         Api:
