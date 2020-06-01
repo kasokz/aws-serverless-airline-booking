@@ -29,7 +29,7 @@ class PaymentException(Exception):
 
 
 @tracer.capture_method
-def collect_payment(charge_id):
+def collect_payment(charge_id, stripeKey):
     """Collects payment from a pre-authorized charge through Payment API
 
     For more info on Stripe Charge Object: https://stripe.com/docs/api/charges/object
@@ -52,7 +52,7 @@ def collect_payment(charge_id):
         logger.error({"operation": "invalid_config", "details": os.environ})
         raise ValueError("Payment API URL is invalid -- Consider reviewing PAYMENT_API_URL env")
 
-    payment_payload = {"chargeId": charge_id}
+    payment_payload = {"chargeId": charge_id, "stripeKey": stripeKey}
 
     try:
         logger.debug({"operation": "collect_payment", "details": payment_payload})
@@ -123,6 +123,7 @@ def lambda_handler(event, context):
 
     pre_authorization_token = event.get("chargeId")
     customer_id = event.get("customerId")
+    stripeKey = event.get("stripeKey")
 
     if not pre_authorization_token:
         log_metric(
@@ -138,7 +139,7 @@ def lambda_handler(event, context):
         logger.debug(
             f"Collecting payment from customer {customer_id} using {pre_authorization_token} token"
         )
-        ret = collect_payment(pre_authorization_token)
+        ret = collect_payment(pre_authorization_token, stripeKey)
 
         log_metric(name="SuccessfulPayment", unit=MetricUnit.Count, value=1)
         logger.debug("Adding Payment Status annotation")

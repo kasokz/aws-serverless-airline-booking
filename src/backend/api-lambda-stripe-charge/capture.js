@@ -22,6 +22,12 @@ exports.handler = (event) => {
   return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
     .then(response => {
       const stripeSecretKeyValue = response.Parameter.Value;
+	  const stripeSecretKeys = response.Parameter.Value.split(',');
+	  const keyId = 0;
+	  if(typeof(captureRequest.stripeKey) !== "undefined"){
+          keyId = captureRequest.stripeKey
+      }
+	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
       return captureCharge(stripeSecretKeyValue, captureRequest.chargeId, captureRequest.email);
     })
     .then(capturedCharge => processResponse(IS_CORS, { capturedCharge }))
