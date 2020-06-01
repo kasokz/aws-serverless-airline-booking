@@ -25,7 +25,9 @@ exports.handler = (event) => {
 	  const stripeSecretKeys = response.Parameter.Value.split(',');
 	  const keyId = 0;
 	  if(typeof(captureRequest.stripeKey) !== "undefined"){
+		if(captureRequest.stripeKey !== null){
           keyId = captureRequest.stripeKey
+		}
       }
 	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
       return captureCharge(stripeSecretKeyValue, captureRequest.chargeId, captureRequest.email);
