@@ -64,6 +64,7 @@ input CreateBookingInput {
   id: ID
   status: BookingStatus
   paymentToken: String!
+  stripeKey: String!
   checkedIn: Boolean
   customer: String
   bookingOutboundFlightId: ID!
