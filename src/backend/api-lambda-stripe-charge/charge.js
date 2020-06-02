@@ -21,7 +21,7 @@ exports.handler = (event) => {
   return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
 	.then(response => {
 	  const stripeSecretKeys = response.Parameter.Value.split(',');
-	  const keyId = 0;
+	  keyId = 0;
 	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
           keyId = chargeRequest.stripeKey
       }
