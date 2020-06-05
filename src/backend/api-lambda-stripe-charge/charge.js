@@ -20,15 +20,17 @@ exports.handler = (event) => {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide amount and currency fields as mentioned in the app README', 400));
   }
   
-  ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
-	.then(response => {
-	  const stripeSecretKeys = response.Parameter.Value.split(',');
-	  keyId = 0;
-	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
-          keyId = chargeRequest.stripeKey
-      }
-	  stripeSecretKeyValue = stripeSecretKeys[keyId]
-  })
+  if (stripeSecretKeyValue === "") {
+	  ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
+		.then(response => {
+		  const stripeSecretKeys = response.Parameter.Value.split(',');
+		  keyId = 0;
+		  if(typeof(chargeRequest.stripeKey) !== "undefined"){
+			  keyId = chargeRequest.stripeKey
+		  }
+		  stripeSecretKeyValue = stripeSecretKeys[keyId]
+	  });
+  }
   return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description).then(createdCharge => processResponse(IS_CORS, { createdCharge }))
 	.catch((err) => {
 	  console.log(err);
