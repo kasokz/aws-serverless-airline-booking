@@ -5,7 +5,7 @@ const AWS = require('aws-sdk'),
   createCharge = require('./src/create-charge'),
   STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`
   IS_CORS = true;
-  stripeSecretKeyValue = "";
+  stripeSecretKeys = "";
 
 exports.handler = (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -20,20 +20,32 @@ exports.handler = (event) => {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide amount and currency fields as mentioned in the app README', 400));
   }
   
-  if (stripeSecretKeyValue === "") {
-	  ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
-		.then(response => {
-		  const stripeSecretKeys = response.Parameter.Value.split(',');
+  if (stripeSecretKeys === "") {
+	  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
+	  .then(response => {
+		  stripeSecretKeys = response.Parameter.Value.split(',');
 		  keyId = 0;
 		  if(typeof(chargeRequest.stripeKey) !== "undefined"){
 			  keyId = chargeRequest.stripeKey
 		  }
-		  stripeSecretKeyValue = stripeSecretKeys[keyId]
+		  const stripeSecretKeyValue = stripeSecretKeys[keyId]
+		   return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description);
+	  }).then(createdCharge => processResponse(IS_CORS, {createdCharge }))
+	  .catch((err) => {
+		  console.log(err);
+		  return processResponse(IS_CORS, { err }, 500);
 	  });
-  }
-  return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description).then(createdCharge => processResponse(IS_CORS, { createdCharge }))
-	.catch((err) => {
-	  console.log(err);
-	  return processResponse(IS_CORS, { err }, 500);
-	});
+  } else {
+	  keyId = 0;
+	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
+		keyId = chargeRequest.stripeKey
+	  }
+	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
+	  return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description)
+      .then(createdCharge => processResponse(IS_CORS, {createdCharge }))
+	  .catch((err) => {
+		  console.log(err);
+		  return processResponse(IS_CORS, { err }, 500);
+	  });
+}
 };
