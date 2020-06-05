@@ -5,6 +5,7 @@ const AWS = require('aws-sdk'),
   createCharge = require('./src/create-charge'),
   STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`
   IS_CORS = true;
+  stripeSecretKeyValue = "";
 
 exports.handler = (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -18,17 +19,17 @@ exports.handler = (event) => {
   if (!chargeRequest.amount || !chargeRequest.currency) {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide amount and currency fields as mentioned in the app README', 400));
   }
-  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
+  
+  ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
 	.then(response => {
 	  const stripeSecretKeys = response.Parameter.Value.split(',');
 	  keyId = 0;
 	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
           keyId = chargeRequest.stripeKey
       }
-	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
-	  return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description);
-	})
-	.then(createdCharge => processResponse(IS_CORS, { createdCharge }))
+	  stripeSecretKeyValue = stripeSecretKeys[keyId]
+  })
+  return createCharge(stripeSecretKeyValue, chargeRequest.stripeToken, chargeRequest.email, chargeRequest.amount, chargeRequest.currency, chargeRequest.description).then(createdCharge => processResponse(IS_CORS, { createdCharge }))
 	.catch((err) => {
 	  console.log(err);
 	  return processResponse(IS_CORS, { err }, 500);
