@@ -5,6 +5,7 @@ const AWS = require('aws-sdk'),
   captureCharge = require('./src/capture-charge'),
   STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`,
   IS_CORS = true;
+  stripeSecretKeys = "";
 
 exports.handler = (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -18,10 +19,11 @@ exports.handler = (event) => {
   if (!captureRequest.chargeId) {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide the chargeId (its ID) as mentioned in the app README', 400));
   }
-
-  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
+  
+  if (stripeSecretKeys === "") {
+	  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
     .then(response => {
-	  const stripeSecretKeys = response.Parameter.Value.split(',');
+	  stripeSecretKeys = response.Parameter.Value.split(',');
 	  keyId = 0;
 	  if(typeof(captureRequest.stripeKey) !== "undefined"){
 		if(captureRequest.stripeKey !== null){
@@ -36,4 +38,19 @@ exports.handler = (event) => {
       console.log(err);
       return processResponse(IS_CORS, { err }, 500);
     });
+  } else {
+	  keyId = 0;
+	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
+		keyId = chargeRequest.stripeKey
+	  }
+	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
+	  return captureCharge(stripeSecretKeyValue, captureRequest.chargeId, captureRequest.email)
+    .then(capturedCharge => processResponse(IS_CORS, { capturedCharge }))
+    .catch((err) => {
+      console.log(err);
+      return processResponse(IS_CORS, { err }, 500);
+	  });
+  }
+
+  
 };

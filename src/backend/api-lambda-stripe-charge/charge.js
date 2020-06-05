@@ -47,5 +47,5 @@ exports.handler = (event) => {
 		  console.log(err);
 		  return processResponse(IS_CORS, { err }, 500);
 	  });
-}
+  }
 };
