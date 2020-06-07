@@ -40,8 +40,8 @@ exports.handler = (event) => {
     });
   } else {
 	  keyId = 0;
-	  if(typeof(chargeRequest.stripeKey) !== "undefined"){
-		keyId = chargeRequest.stripeKey
+	  if(typeof(captureRequest.stripeKey) !== "undefined"){
+		keyId = captureRequest.stripeKey
 	  }
 	  const stripeSecretKeyValue = stripeSecretKeys[keyId]
 	  return captureCharge(stripeSecretKeyValue, captureRequest.chargeId, captureRequest.email)
