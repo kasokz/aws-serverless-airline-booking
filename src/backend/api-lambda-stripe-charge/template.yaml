@@ -6,6 +6,7 @@ Globals:
     Runtime: nodejs10.x
     Timeout: 10
     Tracing: Active
+    MemorySize: 256
 
 Parameters:
   CorsOrigin:
@@ -37,6 +38,7 @@ Resources:
         AllowOrigin: !Ref CorsOrigin
         MaxAge: "'3600'"
         AllowMethods: "'OPTIONS,POST'"
+      MemorySize: 256
       EndpointConfiguration: REGIONAL
       StageName: prod
       TracingEnabled: true
@@ -44,6 +46,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: charge.handler
+      MemorySize: 256
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
@@ -67,6 +70,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: capture.handler
+      MemorySize: 256
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
@@ -89,6 +93,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: refund.handler
+      MemorySize: 256
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName

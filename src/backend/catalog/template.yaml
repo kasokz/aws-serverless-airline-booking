@@ -18,6 +18,7 @@ Resources:
       Runtime: python3.7
       CodeUri: src/reserve-flight
       Timeout: 10
+      MemorySize: 256
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
@@ -29,6 +30,7 @@ Resources:
       Runtime: python3.7
       CodeUri: src/release-flight
       Timeout: 10
+      MemorySize: 256
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
