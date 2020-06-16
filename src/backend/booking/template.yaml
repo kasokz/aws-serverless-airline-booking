@@ -166,6 +166,7 @@ Resources:
     ProcessBooking:
         Type: AWS::StepFunctions::StateMachine
         Properties:
+            Type: EXPRESS
             StateMachineName: !Sub Airline-ProcessBooking-${Stage}
             DefinitionString: !Sub |
                 {
