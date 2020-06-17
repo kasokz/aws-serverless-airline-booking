@@ -8,9 +8,7 @@ const { captureAsyncFunc } = require('./tracing-repository'),
 module.exports = {
   createCharge: async function (stripeSecretKey, token, amount, currency, isCapture, description = 'Charge Description'){
     const stripe = require('stripe')(stripeSecretKey, {
-  apiVersion: null,
   maxNetworkRetries: 2,
-  httpAgent: null,
   timeout: 2000,
   host: 'api.example.com',
   port: 123,
@@ -29,9 +27,7 @@ module.exports = {
   },
   captureCharge: async function (stripeSecretKey, charge){
     const stripe = require('stripe')(stripeSecretKey, {
-  apiVersion: null,
   maxNetworkRetries: 2,
-  httpAgent: null,
   timeout: 2000,
   host: 'api.example.com',
   port: 123,
@@ -41,9 +37,7 @@ module.exports = {
   },
   createRefund: async function (stripeSecretKey, charge) {
     const stripe = require('stripe')(stripeSecretKey, {
-  apiVersion: null,
   maxNetworkRetries: 2,
-  httpAgent: null,
   timeout: 2000,
   host: 'api.example.com',
   port: 123,
