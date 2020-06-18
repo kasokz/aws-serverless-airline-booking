@@ -10,7 +10,6 @@ module.exports = {
     const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2019-08-08',
 	  maxNetworkRetries: 2,
-	  httpAgent: new ProxyAgent(process.env.http_proxy),
 	  timeout: 2000,
 	  host: 'api.example.com',
 	  port: 123,
@@ -31,7 +30,6 @@ module.exports = {
     const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2019-08-08',
 	  maxNetworkRetries: 2,
-	  httpAgent: new ProxyAgent(process.env.http_proxy),
 	  timeout: 2000,
 	  host: 'api.example.com',
 	  port: 123,
@@ -43,7 +41,6 @@ module.exports = {
     const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2019-08-08',
 	  maxNetworkRetries: 2,
-	  httpAgent: new ProxyAgent(process.env.http_proxy),
 	  timeout: 2000,
 	  host: 'api.example.com',
 	  port: 123,
