@@ -9,8 +9,8 @@ module.exports = {
   createCharge: async function (stripeSecretKey, token, amount, currency, isCapture, description = 'Charge Description'){
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
-	  maxNetworkRetries: 2,
-	  timeout: 2000,
+	  maxNetworkRetries: 5,
+	  timeout: 3000,
 	});
     return await captureAsyncFunc(CREATE_CHARGE_MESSAGE_TRACE, () => 
       stripe.charges.create({
@@ -25,16 +25,16 @@ module.exports = {
   captureCharge: async function (stripeSecretKey, charge){
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
-	  maxNetworkRetries: 2,
-	  timeout: 2000,
+	  maxNetworkRetries: 5,
+	  timeout: 3000,
 	});
     return await captureAsyncFunc(CAPTURE_CHARGE_MESSAGE_TRACE, () => stripe.charges.capture(charge));
   },
   createRefund: async function (stripeSecretKey, charge) {
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
-	  maxNetworkRetries: 2,
-	  timeout: 2000,
+	  maxNetworkRetries: 5,
+	  timeout: 3000,
 	});
     return await captureAsyncFunc(CREATE_REFUND_MESSAGE_TRACE, () => stripe.refunds.create({charge}));
   }
