@@ -10,7 +10,7 @@ module.exports = {
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
 	  maxNetworkRetries: 5,
-	  timeout: 3000,
+      telemetry: false,
 	});
     return await captureAsyncFunc(CREATE_CHARGE_MESSAGE_TRACE, () => 
       stripe.charges.create({
@@ -26,7 +26,7 @@ module.exports = {
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
 	  maxNetworkRetries: 5,
-	  timeout: 3000,
+      telemetry: false,
 	});
     return await captureAsyncFunc(CAPTURE_CHARGE_MESSAGE_TRACE, () => stripe.charges.capture(charge));
   },
@@ -34,7 +34,7 @@ module.exports = {
 	const stripe = require('stripe')(stripeSecretKey, {
 	  apiVersion: '2020-03-02',
 	  maxNetworkRetries: 5,
-	  timeout: 3000,
+      telemetry: false,
 	});
     return await captureAsyncFunc(CREATE_REFUND_MESSAGE_TRACE, () => stripe.refunds.create({charge}));
   }
