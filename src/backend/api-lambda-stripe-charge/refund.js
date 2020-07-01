@@ -4,8 +4,13 @@ const AWS = require('aws-sdk'),
   createRefund = require('./src/create-refund'),
   STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`,
   IS_CORS = true;
+  _cold_start = true
 
-exports.handler = (event) => {
+exports.handler = (event, context) => {
+    if _cold_start:
+        _cold_start = false
+		console.log("COLDSTART " + context.awsRequestId)
+		
   if (event.httpMethod === 'OPTIONS') {
     return Promise.resolve(processResponse(IS_CORS));
   }

@@ -8,6 +8,8 @@ session = boto3.Session()
 dynamodb = session.resource('dynamodb')
 table = dynamodb.Table(os.environ['FLIGHT_TABLE_NAME'])
 
+_cold_start = True
+
 
 class FlightReservationException(Exception):
     pass
@@ -47,6 +49,11 @@ def reserve_seat_on_flight(flight_id):
 
 
 def lambda_handler(event, context):
+    global _cold_start
+    if _cold_start:
+        _cold_start = False
+		print("COLDSTART", context.aws_request_id)
+		
     if 'outboundFlightId' not in event:
         raise ValueError('Invalid arguments')
 

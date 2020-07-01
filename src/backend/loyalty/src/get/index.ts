@@ -4,6 +4,7 @@ import { DefaultDocumentClient, DocumentClientInterface, QueryInput, ItemList } 
 const tableName = process.env.TABLE_NAME;
 const client = DefaultDocumentClient;
 
+_cold_start = true
 /**
  * Result interface
  */
@@ -117,6 +118,10 @@ export const points = async (customerId: string, client: DocumentClientInterface
  * @returns {Promise<APIGatewayProxyResult>}
  */
 export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+  if (_cold_start):
+    _cold_start = false
+	console.log("COLDSTART " + context.awsRequestId)
+	
   if (!event.pathParameters || !event.pathParameters.customerId) {
     throw new Error('customerId not defined');
   }
