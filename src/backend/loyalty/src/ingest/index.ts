@@ -5,7 +5,7 @@ import uuidv4 from 'uuid/v4';
 const client = DefaultDocumentClient;
 const table = process.env.TABLE_NAME
 
-_cold_start = true
+let _cold_start: boolean = true;
 /**
  * Result interface
  */
@@ -106,9 +106,10 @@ export const addPoints = async (customerId: string, points: number, client: Docu
  * @returns {Promise<Result>}
  */
 export async function handler(event: SNSEvent, context: Context): Promise<Result> {
-  if (_cold_start):
+  if (_cold_start) {
     _cold_start = false
 	console.log("COLDSTART " + context.awsRequestId)
+  }
 		
   if (!table) {
     throw new Error(`Table name not defined`);
