@@ -117,7 +117,7 @@ export const points = async (customerId: string, client: DocumentClientInterface
  * @param {APIGatewayEvent} event
  * @returns {Promise<APIGatewayProxyResult>}
  */
-export const handler = async (event: APIGatewayEvent): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: APIGatewayEvent, context: Context): Promise<APIGatewayProxyResult> => {
   if (_cold_start) {
     _cold_start = false
 	console.log("COLDSTART " + context.awsRequestId)
