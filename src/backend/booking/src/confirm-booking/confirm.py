@@ -112,7 +112,7 @@ def lambda_handler(event, context):
             name="ColdStart", unit=MetricUnit.Count, value=1, function_name=context.function_name
         )
         _cold_start = False
-		print("COLDSTART", context.aws_request_id)
+        print("COLDSTART", context.aws_request_id)
 
     booking_id = event.get("bookingId")
     if not booking_id:

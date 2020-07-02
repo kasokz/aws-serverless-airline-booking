@@ -54,8 +54,8 @@ def lambda_handler(event, context):
     global _cold_start
     if _cold_start:
         _cold_start = False
-		print("COLDSTART", context.aws_request_id)
-		
+        print("COLDSTART", context.aws_request_id)
+        
     if 'outboundFlightId' not in event:
         raise ValueError('Invalid arguments')
 
