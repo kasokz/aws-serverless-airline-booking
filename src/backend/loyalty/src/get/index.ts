@@ -1,4 +1,4 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { DefaultDocumentClient, DocumentClientInterface, QueryInput, ItemList } from './lib/document_client';
 
 const tableName = process.env.TABLE_NAME;
