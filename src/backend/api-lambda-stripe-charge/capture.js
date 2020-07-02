@@ -9,9 +9,10 @@ const AWS = require('aws-sdk'),
   _cold_start = true
 
 exports.handler = (event, context) => {
-    if _cold_start:
+    if (_cold_start) {
         _cold_start = false
 		console.log("COLDSTART " + context.awsRequestId)
+    }
 		
   if (event.httpMethod === 'OPTIONS') {
     return Promise.resolve(processResponse(IS_CORS));
