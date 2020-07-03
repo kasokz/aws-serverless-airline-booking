@@ -6,7 +6,7 @@ Globals:
     Runtime: nodejs10.x
     Timeout: 10
     Tracing: Active
-    MemorySize: 256
+    MemorySize: 1024
 
 Parameters:
   CorsOrigin:
@@ -45,7 +45,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: charge.handler
-      MemorySize: 256
+      MemorySize: 1024
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
@@ -69,7 +69,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: capture.handler
-      MemorySize: 256
+      MemorySize: 1024
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
@@ -92,7 +92,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: refund.handler
-      MemorySize: 256
+      MemorySize: 1024
       Policies:
         - SNSCrudPolicy:
             TopicName: !GetAtt SNSTopic.TopicName
