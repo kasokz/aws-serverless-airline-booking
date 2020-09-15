@@ -45,7 +45,7 @@ Resources:
             FunctionName: !Sub Airline-ConfirmBooking-${Stage}
             Handler: confirm.lambda_handler
             CodeUri: src/confirm-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -61,9 +61,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-CancelBooking-${Stage}
-            Handler: cancel.lambda_handler
+            Handler: cancel.handler
             CodeUri: src/cancel-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -80,9 +80,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-ReserveBooking-${Stage}
-            Handler: reserve.lambda_handler
+            Handler: reserve.handler
             CodeUri: src/reserve-booking
-            Runtime: python3.7
+            Runtime: nodejs.12x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -101,9 +101,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-NotifyBooking-${Stage}
-            Handler: notify.lambda_handler
+            Handler: notify.handler
             CodeUri: src/notify-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             MemorySize: 256
             Environment:
                 Variables:

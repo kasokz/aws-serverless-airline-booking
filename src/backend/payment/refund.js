@@ -1,4 +1,4 @@
-const AWS = require('../catalog.js/src/release-flight/node_modules/aws-sdk'),
+const AWS = require('../catalog/src/release-flight/node_modules/aws-sdk'),
   ssm = new AWS.SSM(),
   processResponse = require('./src/process-response'),
   createRefund = require('./src/create-refund'),

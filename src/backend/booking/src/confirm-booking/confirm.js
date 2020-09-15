@@ -1,80 +1,49 @@
-const AWS = require("../../../catalog.js/src/release-flight/node_modules/aws-sdk");
+const os = require("os");
+const AWS = require("../../../catalog/src/release-flight/node_modules/aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
-const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
-
-const tableName = process.env.BOOKING_TABLE_NAME;
+const crypto = require("crypto");
 
 let coldStart = true;
 
-function isBookingRequestValid(booking) {
-  return ["outboundFlightId", "customerId", "chargeId"].every(prop => booking.hasOwnProperty(prop));
-}
-
-async function reserveBooking(booking) {
+async function confirmBooking(bookingId) {
   try {
-    const [{ value: month }, { }, { value: day }, { }, { value: year }, { }, { value: hour }, { }, { value: minute }, { }, { value: second }, { }, { value: fractionalSecond }] = datetimeFormat.formatToParts(new Date());
-    const bookingId = uuidv4();
-    const stateMachineExecutionId = booking.name;
-    const outboundFlightId = booking.outboundFlightId;
-    const customerId = booking.customerId;
-    const paymentToken = booking.chargeId;
-
-    await dynamodb.putItem({
-      Item: {
-        "id": {
-          S: bookingId
-        },
-        "stateExecutionId": {
-          S: stateMachineExecutionId
-        },
-        "__typename": {
-          S: "Booking"
-        },
-        "bookingOutboundFlightId": {
-          S: outboundFlightId
-        },
-        "checkedIn": {
-          BOOL: false
-        },
-        "customer": {
-          S: customerId
-        },
-        "paymentToken": {
-          S: paymentToken
-        },
-        "status": {
-          S: "CONFIRMED"
-        },
-        "createdAt": {
-          S: `${year}-${month}-${day} ${hour}:${minute}:${second}.${fractionalSecond}000`
-        }
+    const reference = crypto.randomBytes(4, (_, buffer) => { buffer.toString("hex") });
+    await dynamodb.updateItem({
+      Key: { "id": { S: bookingId } },
+      ConditionExpression: "id = :idVal",
+      UpdateExpression: "SET bookingReference = :br, #STATUS = :confirmed",
+      ExpressionAttributeNames: { "#STATUS": "status" },
+      ExpressionAttributeValues: {
+        ":br": { S: reference },
+        ":idVal": { S: bookingId },
+        ":confirmed": { S: "CONFIRMED" },
       },
-      TableName: tableName
+      ReturnValues: "UPDATED_NEW",
+      TableName: process.env.BOOKING_TABLE_NAME
     }).promise();
-
-    return { "bookingId": bookingId };
-  } catch (err) {
-    throw err;
+    return { "bookingReference": reference }
+  } catch (error) {
+    throw error;
   }
 }
 
 async function lambdaHandler(event, context) {
   if (coldStart) {
     coldStart = false;
-    console.log("COLDSTART", context.aws_request_id);
+    console.log("COLDSTART", context.awsRequestId);
   }
-  if (!isBookingRequestValid(event)) {
-    throw new Error("Invalid booking request")
+  const bookingId = event.bookingId;
+  if (!bookingId) {
+    throw new Error("Invalid booking ID");
   }
   try {
-    const ret = await reserveBooking(event);
-    return ret.bookingId;
-  } catch (err) {
-    throw err;
+    const ret = await confirmBooking(bookingId);
+    return ret.bookingReference;
+  } catch (error) {
+    throw error;
   }
 }
-
 
 // monitoring function wrapping arbitrary payload code
 async function handler(event, context, payload) {
@@ -193,7 +162,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.reserve-booking-metrics"
+      TableName: "long.ma.confirm-booking-metrics"
     }).promise();
 
   return ret;

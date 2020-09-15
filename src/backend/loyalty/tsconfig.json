@@ -3,7 +3,7 @@
     "./src/**/*.ts"
   ],
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2019",
     "module": "commonjs",
     "strict": true,
     "baseUrl": "./",

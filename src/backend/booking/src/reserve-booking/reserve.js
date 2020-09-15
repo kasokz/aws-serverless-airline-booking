@@ -1,57 +1,80 @@
-const AWS = require("../../../catalog.js/src/release-flight/node_modules/aws-sdk");
+const AWS = require("../../../catalog/src/release-flight/node_modules/aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
-const sns = new AWS.SNS({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
+const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
 
-const bookingSNSTopic = process.env.BOOKING_TOPIC;
+const tableName = process.env.BOOKING_TABLE_NAME;
 
 let coldStart = true;
 
-async function notifyBooking(payload, bookingRef) {
+function isBookingRequestValid(booking) {
+  return ["outboundFlightId", "customerId", "chargeId"].every(prop => booking.hasOwnProperty(prop));
+}
 
-  const bookingReference = bookingRef || "most recent booking";
-  const successfulSubject = `Booking confirmation for ${bookingReference}`;
-  const unsuccessfulSubject = `Unable to process booking for ${bookingReference}`;
-
-  const subject = bookingReference ? successfulSubject : unsuccessfulSubject;
-  const bookingStatus = bookingReference ? "confirmed" : "cancelled";
-
+async function reserveBooking(booking) {
   try {
-    const ret = await sns.publish({
-      TopicArn: bookingSNSTopic,
-      Message: JSON.stringify(payload),
-      Subject: subject,
-      MessageAttributes: {
-        "Booking.Status": { "DataType": "String", "StringValue": bookingStatus }
+    const [{ value: month }, { }, { value: day }, { }, { value: year }, { }, { value: hour }, { }, { value: minute }, { }, { value: second }, { }, { value: fractionalSecond }] = datetimeFormat.formatToParts(new Date());
+    const bookingId = uuidv4();
+    const stateMachineExecutionId = booking.name;
+    const outboundFlightId = booking.outboundFlightId;
+    const customerId = booking.customerId;
+    const paymentToken = booking.chargeId;
+
+    await dynamodb.putItem({
+      Item: {
+        "id": {
+          S: bookingId
+        },
+        "stateExecutionId": {
+          S: stateMachineExecutionId
+        },
+        "__typename": {
+          S: "Booking"
+        },
+        "bookingOutboundFlightId": {
+          S: outboundFlightId
+        },
+        "checkedIn": {
+          BOOL: false
+        },
+        "customer": {
+          S: customerId
+        },
+        "paymentToken": {
+          S: paymentToken
+        },
+        "status": {
+          S: "CONFIRMED"
+        },
+        "createdAt": {
+          S: `${year}-${month}-${day} ${hour}:${minute}:${second}.${fractionalSecond}000`
+        }
       },
+      TableName: tableName
     }).promise();
-    return { "notificationId": ret.MessageId };
-  } catch (error) {
-    throw error;
+
+    return { "bookingId": bookingId };
+  } catch (err) {
+    throw err;
   }
 }
 
 async function lambdaHandler(event, context) {
   if (coldStart) {
-    coldStart = false
-    console.log("COLDSTART", context.awsRequestId)
+    coldStart = false;
+    console.log("COLDSTART", context.aws_request_id);
   }
-  const customerId = event.customerId;
-  const payment = event.payment;
-  const price = payment.price;
-  const bookingReference = event.bookingReference;
-
-  if (!customerId && !price) {
-    throw new Error("Invalid customer and price");
+  if (!isBookingRequestValid(event)) {
+    throw new Error("Invalid booking request")
   }
   try {
-    const payload = { "customerId": customerId, "price": price };
-    const ret = await notifyBooking(payload, bookingReference);
-    return ret.notificationId;
-  } catch (error) {
-    throw error;
+    const ret = await reserveBooking(event);
+    return ret.bookingId;
+  } catch (err) {
+    throw err;
   }
 }
+
 
 // monitoring function wrapping arbitrary payload code
 async function handler(event, context, payload) {
@@ -170,7 +193,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.notify-booking-metrics"
+      TableName: "long.ma.reserve-booking-metrics"
     }).promise();
 
   return ret;

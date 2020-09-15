@@ -1,28 +1,31 @@
-const os = require("os");
-const AWS = require("../../../catalog.js/src/release-flight/node_modules/aws-sdk");
+const AWS = require("../../../catalog/src/release-flight/node_modules/aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
+const sns = new AWS.SNS({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
-const crypto = require("crypto");
+
+const bookingSNSTopic = process.env.BOOKING_TOPIC;
 
 let coldStart = true;
 
-async function confirmBooking(bookingId) {
+async function notifyBooking(payload, bookingRef) {
+
+  const bookingReference = bookingRef || "most recent booking";
+  const successfulSubject = `Booking confirmation for ${bookingReference}`;
+  const unsuccessfulSubject = `Unable to process booking for ${bookingReference}`;
+
+  const subject = bookingReference ? successfulSubject : unsuccessfulSubject;
+  const bookingStatus = bookingReference ? "confirmed" : "cancelled";
+
   try {
-    const reference = crypto.randomBytes(4, (_, buffer) => { buffer.toString("hex") });
-    await dynamodb.updateItem({
-      Key: { "id": { S: bookingId } },
-      ConditionExpression: "id = :idVal",
-      UpdateExpression: "SET bookingReference = :br, #STATUS = :confirmed",
-      ExpressionAttributeNames: { "#STATUS": "status" },
-      ExpressionAttributeValues: {
-        ":br": { S: reference },
-        ":idVal": { S: bookingId },
-        ":confirmed": { S: "CONFIRMED" },
+    const ret = await sns.publish({
+      TopicArn: bookingSNSTopic,
+      Message: JSON.stringify(payload),
+      Subject: subject,
+      MessageAttributes: {
+        "Booking.Status": { "DataType": "String", "StringValue": bookingStatus }
       },
-      ReturnValues: "UPDATED_NEW",
-      TableName: process.env.BOOKING_TABLE_NAME
     }).promise();
-    return { "bookingReference": reference }
+    return { "notificationId": ret.MessageId };
   } catch (error) {
     throw error;
   }
@@ -30,16 +33,21 @@ async function confirmBooking(bookingId) {
 
 async function lambdaHandler(event, context) {
   if (coldStart) {
-    coldStart = false;
-    console.log("COLDSTART", context.awsRequestId);
+    coldStart = false
+    console.log("COLDSTART", context.awsRequestId)
   }
-  const bookingId = event.bookingId;
-  if (!bookingId) {
-    throw new Error("Invalid booking ID");
+  const customerId = event.customerId;
+  const payment = event.payment;
+  const price = payment.price;
+  const bookingReference = event.bookingReference;
+
+  if (!customerId && !price) {
+    throw new Error("Invalid customer and price");
   }
   try {
-    const ret = await confirmBooking(bookingId);
-    return ret.bookingReference;
+    const payload = { "customerId": customerId, "price": price };
+    const ret = await notifyBooking(payload, bookingReference);
+    return ret.notificationId;
   } catch (error) {
     throw error;
   }
@@ -162,7 +170,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.confirm-booking-metrics"
+      TableName: "long.ma.notify-booking-metrics"
     }).promise();
 
   return ret;

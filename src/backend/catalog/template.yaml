@@ -14,8 +14,8 @@ Resources:
   ReserveFlight:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: reserve.lambda_handler
-      Runtime: python3.7
+      Handler: reserve.handler
+      Runtime: nodejs12.x
       CodeUri: src/reserve-flight
       Timeout: 10
       MemorySize: 256
@@ -26,8 +26,8 @@ Resources:
   ReleaseFlight:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: release.lambda_handler
-      Runtime: python3.7
+      Handler: release.handler
+      Runtime: nodejs12.x
       CodeUri: src/release-flight
       Timeout: 10
       MemorySize: 256
