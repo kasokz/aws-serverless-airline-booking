@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk'),
+const AWS = require('../catalog.js/src/release-flight/node_modules/aws-sdk'),
   ssm = new AWS.SSM(),
   qs = require('querystring'),
   processResponse = require('./src/process-response'),
@@ -13,7 +13,7 @@ exports.handler = (event, context) => {
         _cold_start = false
 		console.log("COLDSTART " + context.awsRequestId)
     }
-		
+
   if (event.httpMethod === 'OPTIONS') {
     return Promise.resolve(processResponse(IS_CORS));
   }
@@ -25,7 +25,7 @@ exports.handler = (event, context) => {
   if (!captureRequest.chargeId) {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide the chargeId (its ID) as mentioned in the app README', 400));
   }
-  
+
   if (stripeSecretKeys === "") {
 	  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
     .then(response => {
@@ -58,5 +58,5 @@ exports.handler = (event, context) => {
 	  });
   }
 
-  
+
 };

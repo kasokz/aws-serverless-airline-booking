@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk'),
+const AWS = require('../catalog.js/src/release-flight/node_modules/aws-sdk'),
   ssm = new AWS.SSM(),
   qs = require('querystring'),
   processResponse = require('./src/process-response'),

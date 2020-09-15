@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk'),
+const AWS = require('../catalog.js/src/release-flight/node_modules/aws-sdk'),
   ssm = new AWS.SSM(),
   qs = require('querystring'),
   processResponse = require('./src/process-response'),
@@ -13,7 +13,7 @@ exports.handler = (event) => {
   if (!event.body) {
     return Promise.resolve(processResponse(IS_CORS, 'invalid', 400));
   }
-  
+
   const chargeRequest = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
   if (!chargeRequest.amount || !chargeRequest.currency) {
     return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide amount and currency fields as mentioned in the app README', 400));

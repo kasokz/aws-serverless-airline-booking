@@ -38,7 +38,7 @@ delete.booking: ##=> Delete booking service
 
 delete.paymentapi: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name api-lambda-stripe-charge
-	
+
 delete.payment: ##=> Delete payment service
 	aws cloudformation delete-stack --stack-name $${STACK_NAME}-payment-$${AWS_BRANCH}
 
@@ -77,7 +77,7 @@ deploy.paymentapi: ##=> Deploy payment service using SAM
 		npm run prepackage && \
 		npm run package && \
 		npm run deploy
-			
+
 deploy.payment: ##=> Deploy payment service using SAM
 	$(info [*] Packaging and deploying Payment service...)
 	cd src/backend/payment && \

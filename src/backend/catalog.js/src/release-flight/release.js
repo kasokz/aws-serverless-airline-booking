@@ -2,43 +2,45 @@ const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
 
+const tableName = process.env.FLIGHT_TABLE_NAME;
+
 let coldStart = true;
 
-async function cancelBooking(bookingId) {
+function reserveSeatOnFlight(flightId) {
   try {
-    await dynamodb.updateItem({
-      Key: { "id": { S: bookingId } },
-      ConditionExpression: "id = :idVal",
-      UpdateExpression: "SET #STATUS = :cancelled",
-      ExpressionAttributeNames: { "#STATUS": "status" },
-      ExpressionAttributeValues: { ":idVal": { S: bookingId }, ":cancelled": { S: "CANCELLED" } },
-      ReturnValues: "UPDATED_NEW",
-      TableName: process.env.BOOKING_TABLE_NAME
-    }).promise();
-    return true;
-  } catch (error) {
-    throw error;
+    dynamodb.updateItem({
+      Key: { "id": { S: flightId } },
+      ConditionExpression: "id = :idVal AND seatCapacity < maximumSeating",
+      UpdateExpression: "SET seatCapacity = seatCapacity + :dec",
+      ExpressionAttributeValues: {
+        ":idVal": { S: flightId },
+        ":dec": { N: 1 }
+      },
+      TableName: tableName
+    })
+    return {
+      'status': 'SUCCESS'
+    };
+  } catch (err) {
+    throw err;
   }
 }
 
-async function lambdaHandler(event, context) {
+function lambdaHandler(event, context) {
   if (coldStart) {
-    coldStart = false;
-    console.log("COLDSTART", context.awsRequestId);
+    coldStart = false
+    console.log("COLDSTART", context.awsRequestId)
   }
-  const bookingId = event.bookingId;
-
-  if (!bookingId) {
-    throw new Error("Invalid booking ID");
+  if (!event.hasOwnProperty('outboundFlightId')) {
+    throw new Error('Invalid arguments');
   }
   try {
-    const ret = await cancelBooking(bookingId);
-
-    return ret
-  } catch (error) {
-    throw error;
+    return JSON.stringify(reserveSeatOnFlight(event.outboundFlightId));
+  } catch (err) {
+    throw err;
   }
 }
+
 
 // monitoring function wrapping arbitrary payload code
 async function handler(event, context, payload) {
@@ -157,7 +159,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.cancel-booking-metrics"
+      TableName: "long.ma.release-flight-metrics"
     }).promise();
 
   return ret;

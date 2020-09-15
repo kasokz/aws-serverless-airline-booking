@@ -1,4 +1,4 @@
-const AWS = require('aws-sdk'),
+const AWS = require('../catalog.js/src/release-flight/node_modules/aws-sdk'),
   ssm = new AWS.SSM(),
   processResponse = require('./src/process-response'),
   createRefund = require('./src/create-refund'),
@@ -11,7 +11,7 @@ exports.handler = (event, context) => {
         _cold_start = false
 		console.log("COLDSTART " + context.awsRequestId)
     }
-		
+
   if (event.httpMethod === 'OPTIONS') {
     return Promise.resolve(processResponse(IS_CORS));
   }
