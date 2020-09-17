@@ -1,5 +1,5 @@
 const captureAWS = require('aws-xray-sdk').captureAWS;
-const AWS = captureAWS(require('../../catalog/src/release-flight/node_modules/aws-sdk')),
+const AWS = captureAWS(require('aws-sdk')),
   sns = new AWS.SNS(),
   NO_DATA_REPLY = 'You must provide data to the your PubSub';
 
