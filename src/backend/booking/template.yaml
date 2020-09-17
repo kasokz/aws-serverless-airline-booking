@@ -42,50 +42,50 @@ Resources:
     ConfirmBookingMetricsTable:
         Type: AWS::DynamoDB::Table
         Properties:
-        TableName: long.ma.confirm-booking-metrics
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-            - AttributeName: id
-              AttributeType: S
-        KeySchema:
-            - AttributeName: id
-              KeyType: HASH
+            TableName: long.ma.confirm-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                -   AttributeName: id
+                    AttributeType: S
+            KeySchema:
+                -   AttributeName: id
+                    KeyType: HASH
 
     CancelBookingMetricsTable:
         Type: AWS::DynamoDB::Table
         Properties:
-        TableName: long.ma.cancel-booking-metrics
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-            - AttributeName: id
-              AttributeType: S
-        KeySchema:
-            - AttributeName: id
-              KeyType: HASH
+            TableName: long.ma.cancel-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
 
     NotifyBookingMetricsTable:
         Type: AWS::DynamoDB::Table
         Properties:
-        TableName: long.ma.notify-booking-metrics
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-            - AttributeName: id
-              AttributeType: S
-        KeySchema:
-            - AttributeName: id
-              KeyType: HASH
+            TableName: long.ma.notify-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
 
     ReserveBookingMetricsTable:
         Type: AWS::DynamoDB::Table
         Properties:
-        TableName: long.ma.reserve-booking-metrics
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-            - AttributeName: id
-              AttributeType: S
-        KeySchema:
-            - AttributeName: id
-              KeyType: HASH
+            TableName: long.ma.reserve-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
 
     ConfirmBooking:
         Type: AWS::Serverless::Function
