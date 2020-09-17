@@ -91,6 +91,7 @@ export async function fetchBooking(
  * @param {object} obj - Object containing params required to create a booking
  * @param {object} obj.paymentToken - Stripe JS Payment token object
  * @param {Flight} obj.outboundFlight - Outbound Flight
+ * @param {object} obj.stripeKey - Stripe Key
  * @returns {promise} - Promise representing booking effectively made in the Booking service.
  * @example
  * // exerpt from src/views/FlightSelection.vue
@@ -118,7 +119,7 @@ export async function fetchBooking(
  */
 export async function createBooking(
   { rootState },
-  { paymentToken, outboundFlight }
+  { paymentToken, outboundFlight, stripeKey }
 ) {
   console.group("store/bookings/actions/createBooking");
   try {
@@ -144,7 +145,8 @@ export async function createBooking(
     const processBookingInput = {
       input: {
         paymentToken: chargeToken,
-        bookingOutboundFlightId: outboundFlight.id
+        bookingOutboundFlightId: outboundFlight.id,
+        stripeKey: stripeKey
       }
     };
 
