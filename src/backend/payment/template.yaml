@@ -17,15 +17,45 @@ Globals:
         LOG_LEVEL: INFO
 
 Resources:
+  CollectPaymentMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.collect-payment-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  RefundPaymentMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.refund-payment-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
   CollectPayment:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub Airline-CollectPayment-${Stage}
-      Handler: collect.lambda_handler
-      Runtime: python3.7
+      Handler: collect.handler
+      Runtime: nodejs12.x
       CodeUri: src/collect-payment
       Timeout: 10
       MemorySize: 256
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CollectPaymentMetricsTable}"
       Environment:
         Variables:
           PAYMENT_API_URL: !ImportValue CaptureApiUrl
@@ -35,11 +65,17 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub Airline-RefundPayment-${Stage}
-      Handler: refund.lambda_handler
+      Handler: refund.handler
       CodeUri: src/refund-payment
-      Runtime: python3.7
+      Runtime: nodejs12.x
       Timeout: 10
       MemorySize: 256
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${RefundPaymentMetricsTable}"
       Environment:
         Variables:
           PAYMENT_API_URL: !ImportValue RefundApiUrl
@@ -81,7 +117,6 @@ Resources:
       Name: !Sub "/${Stage}/service/payment/api/refund/url"
       Type: String
       Value: !ImportValue RefundApiUrl
-
 
 Outputs:
   CollectPaymentFunction:
