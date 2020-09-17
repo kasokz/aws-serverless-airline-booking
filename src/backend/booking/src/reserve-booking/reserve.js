@@ -1,4 +1,4 @@
-const AWS = require("../../../catalog/src/release-flight/node_modules/aws-sdk");
+const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
 const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });

@@ -1,4 +1,4 @@
-const AWS = require("../../../catalog/src/release-flight/node_modules/aws-sdk");
+const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
 

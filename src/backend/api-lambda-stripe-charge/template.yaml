@@ -16,12 +16,12 @@ Parameters:
     MaxLength: 250
   SSMParameterPath:
     Type: String
-    Default: 'lambda-stripe-charge/stripe-secret-keys'
+    Default: "lambda-stripe-charge/stripe-secret-keys"
     Description: >
       This component assumes the Stripe Secret key needed to use the Stripe Charge API is stored as SecureStrings in SSM Parameter Store under the path defined by
       this parameter. See the component README for details.
     AllowedPattern: ^[0-9a-zA-Z-][0-9a-zA-Z-\/]+
-    ConstraintDescription: 'Must start with a slash and alphanumeric characters (exclude the starting slash)'
+    ConstraintDescription: "Must start with a slash and alphanumeric characters (exclude the starting slash)"
   EnableInstantCapture:
     Type: String
     AllowedValues: [true, false]
@@ -30,6 +30,42 @@ Parameters:
 Conditions:
   ShouldEnableCapture: !Equals [true, !Ref EnableInstantCapture]
 Resources:
+  ChargeStripeMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.charge-stripe-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  CaptureStripeMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.capture-stripe-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  RefundStripeMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.refund-stripe-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
   ChargeStripeApiWebhook:
     Type: AWS::Serverless::Api
     Properties:
@@ -41,6 +77,7 @@ Resources:
       EndpointConfiguration: REGIONAL
       StageName: prod
       TracingEnabled: true
+
   CreateStripeCharge:
     Type: AWS::Serverless::Function
     Properties:
@@ -51,6 +88,11 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ChargeStripeMetricsTable}"
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
@@ -65,6 +107,7 @@ Resources:
             Path: /charge
             Method: POST
             RestApiId: !Ref ChargeStripeApiWebhook
+
   CaptureStripeCharge:
     Type: AWS::Serverless::Function
     Properties:
@@ -75,6 +118,11 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CaptureStripeMetricsTable}"
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
@@ -88,6 +136,7 @@ Resources:
             Path: /capture
             Method: POST
             RestApiId: !Ref ChargeStripeApiWebhook
+
   CreateRefund:
     Type: AWS::Serverless::Function
     Properties:
@@ -98,6 +147,11 @@ Resources:
             TopicName: !GetAtt SNSTopic.TopicName
         - SSMParameterReadPolicy:
             ParameterName: !Ref SSMParameterPath
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${RefundStripeMetricsTable}"
       Environment:
         Variables:
           IS_CORS: IsCorsDefined
@@ -111,6 +165,7 @@ Resources:
             Path: /refund
             Method: POST
             RestApiId: !Ref ChargeStripeApiWebhook
+
   SNSTopic:
     Type: AWS::SNS::Topic
 Outputs:
