@@ -1,7 +1,7 @@
 const AWS = require("aws-sdk");
 const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
 const { v4: uuidv4 } = require('uuid');
-const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 const tableName = process.env.BOOKING_TABLE_NAME;
 
@@ -13,7 +13,7 @@ function isBookingRequestValid(booking) {
 
 async function reserveBooking(booking) {
   try {
-    const [{ value: month }, { }, { value: day }, { }, { value: year }, { }, { value: hour }, { }, { value: minute }, { }, { value: second }, { }, { value: fractionalSecond }] = datetimeFormat.formatToParts(new Date());
+    const [{ value: month }, { }, { value: day }, { }, { value: year }, { }, { value: hour }, { }, { value: minute }, { }, { value: second }] = datetimeFormat.formatToParts(new Date());
     const bookingId = uuidv4();
     const stateMachineExecutionId = booking.name;
     const outboundFlightId = booking.outboundFlightId;
@@ -47,7 +47,7 @@ async function reserveBooking(booking) {
           S: "CONFIRMED"
         },
         "createdAt": {
-          S: `${year}-${month}-${day} ${hour}:${minute}:${second}.${fractionalSecond}000`
+          S: `${year}-${month}-${day} ${hour}:${minute}:${second}.00000`
         }
       },
       TableName: tableName
