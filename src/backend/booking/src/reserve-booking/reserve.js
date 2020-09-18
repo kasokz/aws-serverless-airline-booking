@@ -55,6 +55,7 @@ async function reserveBooking(booking) {
 
     return { "bookingId": bookingId };
   } catch (err) {
+    console.log(err);
     throw err;
   }
 }
@@ -62,7 +63,7 @@ async function reserveBooking(booking) {
 async function lambdaHandler(event, context) {
   if (coldStart) {
     coldStart = false;
-    console.log("COLDSTART", context.aws_request_id);
+    console.log("COLDSTART", context.awsRequestId);
   }
   if (!isBookingRequestValid(event)) {
     throw new Error("Invalid booking request")
@@ -71,6 +72,7 @@ async function lambdaHandler(event, context) {
     const ret = await reserveBooking(event);
     return ret.bookingId;
   } catch (err) {
+    console.log(err);
     throw err;
   }
 }

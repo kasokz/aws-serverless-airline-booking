@@ -27,6 +27,7 @@ async function notifyBooking(payload, bookingRef) {
     }).promise();
     return { "notificationId": ret.MessageId };
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }
@@ -49,6 +50,7 @@ async function lambdaHandler(event, context) {
     const ret = await notifyBooking(payload, bookingReference);
     return ret.notificationId;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }

@@ -24,6 +24,7 @@ async function confirmBooking(bookingId) {
     }).promise();
     return { "bookingReference": reference }
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }
@@ -41,6 +42,7 @@ async function lambdaHandler(event, context) {
     const ret = await confirmBooking(bookingId);
     return ret.bookingReference;
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }

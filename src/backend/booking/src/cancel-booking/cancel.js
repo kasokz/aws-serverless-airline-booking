@@ -17,6 +17,7 @@ async function cancelBooking(bookingId) {
     }).promise();
     return true;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 }
@@ -36,6 +37,7 @@ async function lambdaHandler(event, context) {
 
     return ret
   } catch (error) {
+    console.log(error);
     throw error;
   }
 }

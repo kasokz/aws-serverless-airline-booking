@@ -45,11 +45,11 @@ Resources:
             TableName: long.ma.confirm-booking-metrics
             BillingMode: PAY_PER_REQUEST
             AttributeDefinitions:
-                -   AttributeName: id
-                    AttributeType: S
+                - AttributeName: id
+                  AttributeType: S
             KeySchema:
-                -   AttributeName: id
-                    KeyType: HASH
+                - AttributeName: id
+                  KeyType: HASH
 
     CancelBookingMetricsTable:
         Type: AWS::DynamoDB::Table
@@ -233,7 +233,7 @@ Resources:
     ProcessBooking:
         Type: AWS::StepFunctions::StateMachine
         Properties:
-            StateMachineType: EXPRESS
+            StateMachineType: STANDARD
             StateMachineName: !Sub Airline-ProcessBooking-${Stage}
             DefinitionString: !Sub |
                 {
