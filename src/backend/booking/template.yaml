@@ -91,7 +91,7 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-ConfirmBooking-${Stage}
-            Handler: confirm.lambda_handler
+            Handler: confirm.handler
             CodeUri: src/confirm-booking
             Runtime: nodejs12.x
             Environment:
