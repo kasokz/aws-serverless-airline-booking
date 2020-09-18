@@ -8,7 +8,7 @@ let coldStart = true;
 
 async function confirmBooking(bookingId) {
   try {
-    const reference = crypto.randomBytes(4, (_, buffer) => { buffer.toString("hex") });
+    const reference = crypto.randomBytes(4).toString("hex");
     await dynamodb.updateItem({
       Key: { "id": { S: bookingId } },
       ConditionExpression: "id = :idVal",
