@@ -8,6 +8,7 @@ Globals:
     Timeout: 5
     Tracing: Active
     MemorySize: 1024
+    Runtime: nodejs12.x
   Api:
     TracingEnabled: true
     EndpointConfiguration: REGIONAL
@@ -83,8 +84,6 @@ Resources:
       FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
-      Runtime: nodejs12.x
-      MemorySize: 1024
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
@@ -117,8 +116,6 @@ Resources:
       FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
-      Runtime: nodejs12.x
-      MemorySize: 1024
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref LoyaltyDataTable

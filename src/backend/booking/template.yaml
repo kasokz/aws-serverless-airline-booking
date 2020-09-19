@@ -8,6 +8,7 @@ Globals:
         Timeout: 5
         Tracing: Active
         MemorySize: 1024
+        Runtime: nodejs12.x
         Environment:
             Variables:
                 POWERTOOLS_SERVICE_NAME: booking
@@ -93,7 +94,6 @@ Resources:
             FunctionName: !Sub Airline-ConfirmBooking-${Stage}
             Handler: confirm.handler
             CodeUri: src/confirm-booking
-            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -116,7 +116,6 @@ Resources:
             FunctionName: !Sub Airline-CancelBooking-${Stage}
             Handler: cancel.handler
             CodeUri: src/cancel-booking
-            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -139,7 +138,6 @@ Resources:
             FunctionName: !Sub Airline-ReserveBooking-${Stage}
             Handler: reserve.handler
             CodeUri: src/reserve-booking
-            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
@@ -165,8 +163,6 @@ Resources:
             FunctionName: !Sub Airline-NotifyBooking-${Stage}
             Handler: notify.handler
             CodeUri: src/notify-booking
-            Runtime: nodejs12.x
-            MemorySize: 1024
             Environment:
                 Variables:
                     BOOKING_TOPIC: !Ref BookingTopic

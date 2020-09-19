@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: AWS::Serverless-2016-10-31
 
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    MemorySize: 1024
+
 Parameters:
   Stage:
     Type: String
@@ -39,10 +44,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: reserve.handler
-      Runtime: nodejs12.x
       CodeUri: src/reserve-flight
       Timeout: 10
-      MemorySize: 1024
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
@@ -57,10 +60,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: release.handler
-      Runtime: nodejs12.x
       CodeUri: src/release-flight
       Timeout: 10
-      MemorySize: 1024
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
