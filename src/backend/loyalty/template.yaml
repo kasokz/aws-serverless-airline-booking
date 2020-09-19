@@ -26,6 +26,30 @@ Parameters:
     Description: AWS AppSync API ID
 
 Resources:
+  LoyaltyGetMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.loyalty-get-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  LoyaltyIngestMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.loyalty-ingest-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
   LoyaltyDataTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -59,16 +83,21 @@ Resources:
       FunctionName: !Sub Airline-IngestLoyalty-${Stage}
       CodeUri: build/ingest
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       MemorySize: 1024
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref LoyaltyDataTable
-        - Version: '2012-10-17'
+        - Version: "2012-10-17"
           Statement:
             Action: dynamodb:PutItem
             Effect: Allow
             Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyDataTable}"
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyIngestMetricsTable}"
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable
@@ -88,11 +117,16 @@ Resources:
       FunctionName: !Sub Airline-GetLoyalty-${Stage}
       CodeUri: build/get
       Handler: index.handler
-      Runtime: nodejs10.x
+      Runtime: nodejs12.x
       MemorySize: 1024
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref LoyaltyDataTable
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${LoyaltyGetMetricsTable}"
       Environment:
         Variables:
           TABLE_NAME: !Ref LoyaltyDataTable

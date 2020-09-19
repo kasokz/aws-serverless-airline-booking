@@ -11,29 +11,65 @@ Parameters:
     Description: Flight Table
 
 Resources:
+  ReserveFlightMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.reserve-flight-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
+  ReleaseFlightMetricsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: long.ma.release-flight-metrics
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+
   ReserveFlight:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: reserve.lambda_handler
-      Runtime: python3.7
+      Handler: reserve.handler
+      Runtime: nodejs12.x
       CodeUri: src/reserve-flight
       Timeout: 10
       MemorySize: 1024
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReserveFlightMetricsTable}"
 
   ReleaseFlight:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: release.lambda_handler
-      Runtime: python3.7
+      Handler: release.handler
+      Runtime: nodejs12.x
       CodeUri: src/release-flight
       Timeout: 10
       MemorySize: 1024
       Environment:
         Variables:
           FLIGHT_TABLE_NAME: !Ref FlightTable
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            Action: dynamodb:PutItem
+            Effect: Allow
+            Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReleaseFlightMetricsTable}"
 
   ReserveFlightParameter:
     Type: "AWS::SSM::Parameter"

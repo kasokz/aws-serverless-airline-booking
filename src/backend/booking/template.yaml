@@ -39,60 +39,122 @@ Parameters:
         Description: Parameter Name for AWS AppSync API ID
 
 Resources:
+    ConfirmBookingMetricsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: long.ma.confirm-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
+    CancelBookingMetricsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: long.ma.cancel-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
+    NotifyBookingMetricsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: long.ma.notify-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
+    ReserveBookingMetricsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: long.ma.reserve-booking-metrics
+            BillingMode: PAY_PER_REQUEST
+            AttributeDefinitions:
+                - AttributeName: id
+                  AttributeType: S
+            KeySchema:
+                - AttributeName: id
+                  KeyType: HASH
+
     ConfirmBooking:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-ConfirmBooking-${Stage}
-            Handler: confirm.lambda_handler
+            Handler: confirm.handler
             CodeUri: src/confirm-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:UpdateItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                      Action: dynamodb:UpdateItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                - Version: "2012-10-17"
+                  Statement:
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ConfirmBookingMetricsTable}"
 
     CancelBooking:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-CancelBooking-${Stage}
-            Handler: cancel.lambda_handler
+            Handler: cancel.handler
             CodeUri: src/cancel-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:UpdateItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
-
+                      Action: dynamodb:UpdateItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                - Version: "2012-10-17"
+                  Statement:
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${CancelBookingMetricsTable}"
 
     ReserveBooking:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-ReserveBooking-${Stage}
-            Handler: reserve.lambda_handler
+            Handler: reserve.handler
             CodeUri: src/reserve-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             Environment:
                 Variables:
                     BOOKING_TABLE_NAME: !Ref BookingTable
                     STAGE: !Ref Stage
             Policies:
-                - Version: '2012-10-17'
+                - Version: "2012-10-17"
                   Statement:
-                    Action: dynamodb:PutItem
-                    Effect: Allow
-                    Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${BookingTable}"
+                - Version: "2012-10-17"
+                  Statement:
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ReserveBookingMetricsTable}"
 
     BookingTopic:
         Type: AWS::SNS::Topic
@@ -101,9 +163,9 @@ Resources:
         Type: AWS::Serverless::Function
         Properties:
             FunctionName: !Sub Airline-NotifyBooking-${Stage}
-            Handler: notify.lambda_handler
+            Handler: notify.handler
             CodeUri: src/notify-booking
-            Runtime: python3.7
+            Runtime: nodejs12.x
             MemorySize: 1024
             Environment:
                 Variables:
@@ -112,6 +174,11 @@ Resources:
             Policies:
                 - SNSPublishMessagePolicy:
                       TopicName: !Sub ${BookingTopic.TopicName}
+                - Version: "2012-10-17"
+                  Statement:
+                      Action: dynamodb:PutItem
+                      Effect: Allow
+                      Resource: !Sub "arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NotifyBookingMetricsTable}"
 
     StatesExecutionRole:
         Type: AWS::IAM::Role

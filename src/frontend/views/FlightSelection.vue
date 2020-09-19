@@ -273,7 +273,8 @@ export default {
 
         await this.$store.dispatch("bookings/createBooking", {
           paymentToken: this.token,
-          outboundFlight: this.selectedFlight
+          outboundFlight: this.selectedFlight,
+          stripeKey: 0
         });
 
         // eslint-disable-next-line

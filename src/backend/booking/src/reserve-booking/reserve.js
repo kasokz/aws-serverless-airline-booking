@@ -1,41 +1,81 @@
-const AWS = require('aws-sdk'),
-  ssm = new AWS.SSM(),
-  processResponse = require('./src/process-response'),
-  createRefund = require('./src/create-refund'),
-  STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`,
-  IS_CORS = true;
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB({ region: "us-west-2" });
 const { v4: uuidv4 } = require('uuid');
-let _cold_start = true;
+const datetimeFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-const lambdaHandler = (event, context) => {
-  if (_cold_start) {
-    _cold_start = false
-    console.log("COLDSTART " + context.awsRequestId)
-  }
+const tableName = process.env.BOOKING_TABLE_NAME;
 
-  if (event.httpMethod === 'OPTIONS') {
-    return Promise.resolve(processResponse(IS_CORS));
-  }
-  if (!event.body) {
-    return Promise.resolve(processResponse(IS_CORS, 'invalid', 400));
-  }
+let coldStart = true;
 
-  const refundRequest = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-  if (!refundRequest.chargeId) {
-    return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide the chargeId (its ID) as mentioned in the app README', 400));
-  }
+function isBookingRequestValid(booking) {
+  return ["outboundFlightId", "customerId", "chargeId"].every(prop => booking.hasOwnProperty(prop));
+}
 
-  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
-    .then(response => {
-      const stripeSecretKeyValue = response.Parameter.Value;
-      return createRefund(stripeSecretKeyValue, refundRequest.chargeId, refundRequest.email);
-    })
-    .then(createdRefund => processResponse(IS_CORS, { createdRefund }))
-    .catch((err) => {
-      console.log(err);
-      return processResponse(IS_CORS, { err }, 500);
-    });
-};
+async function reserveBooking(booking) {
+  try {
+    const [{ value: month }, { }, { value: day }, { }, { value: year }, { }, { value: hour }, { }, { value: minute }, { }, { value: second }] = datetimeFormat.formatToParts(new Date());
+    const bookingId = uuidv4();
+    const stateMachineExecutionId = booking.name;
+    const outboundFlightId = booking.outboundFlightId;
+    const customerId = booking.customerId;
+    const paymentToken = booking.chargeId;
+
+    await dynamodb.putItem({
+      Item: {
+        "id": {
+          S: bookingId
+        },
+        "stateExecutionId": {
+          S: stateMachineExecutionId
+        },
+        "__typename": {
+          S: "Booking"
+        },
+        "bookingOutboundFlightId": {
+          S: outboundFlightId
+        },
+        "checkedIn": {
+          BOOL: false
+        },
+        "customer": {
+          S: customerId
+        },
+        "paymentToken": {
+          S: paymentToken
+        },
+        "status": {
+          S: "CONFIRMED"
+        },
+        "createdAt": {
+          S: `${year}-${month}-${day} ${hour}:${minute}:${second}.00000`
+        }
+      },
+      TableName: tableName
+    }).promise();
+
+    return { "bookingId": bookingId };
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+}
+
+async function lambdaHandler(event, context) {
+  if (coldStart) {
+    coldStart = false;
+    console.log("COLDSTART", context.awsRequestId);
+  }
+  if (!isBookingRequestValid(event)) {
+    throw new Error("Invalid booking request")
+  }
+  try {
+    const ret = await reserveBooking(event);
+    return ret.bookingId;
+  } catch (err) {
+    console.log(err);
+    throw err;
+  }
+}
 
 
 // monitoring function wrapping arbitrary payload code
@@ -73,7 +113,6 @@ async function handler(event, context, payload) {
   const [afterBytesRx, afterPkgsRx, afterBytesTx, afterPkgsTx] =
     child_process.execSync("cat /proc/net/dev | grep vinternal_1| awk '{print $2,$3,$10,$11}'").toString().split(" ");
 
-  const dynamodb = new AWS.DynamoDB({ region: 'us-west-2' });
   if (!event.warmup)
     await dynamodb.putItem({
       Item: {
@@ -156,7 +195,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.refund-stripe-metrics"
+      TableName: "long.ma.reserve-booking-metrics"
     }).promise();
 
   return ret;

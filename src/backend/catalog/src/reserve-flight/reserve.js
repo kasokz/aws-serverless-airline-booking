@@ -1,41 +1,46 @@
-const AWS = require('aws-sdk'),
-  ssm = new AWS.SSM(),
-  processResponse = require('./src/process-response'),
-  createRefund = require('./src/create-refund'),
-  STRIPE_SECRET_KEY_NAME = `/${process.env.SSM_PARAMETER_PATH}`,
-  IS_CORS = true;
+const AWS = require("aws-sdk");
+const dynamodb = new AWS.DynamoDB({ region: "us-west-2" });
 const { v4: uuidv4 } = require('uuid');
-let _cold_start = true;
 
-const lambdaHandler = (event, context) => {
-  if (_cold_start) {
-    _cold_start = false
-    console.log("COLDSTART " + context.awsRequestId)
-  }
+const tableName = process.env.FLIGHT_TABLE_NAME;
 
-  if (event.httpMethod === 'OPTIONS') {
-    return Promise.resolve(processResponse(IS_CORS));
-  }
-  if (!event.body) {
-    return Promise.resolve(processResponse(IS_CORS, 'invalid', 400));
-  }
+let coldStart = true;
 
-  const refundRequest = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
-  if (!refundRequest.chargeId) {
-    return Promise.resolve(processResponse(IS_CORS, 'invalid arguments, please provide the chargeId (its ID) as mentioned in the app README', 400));
-  }
-
-  return ssm.getParameter({ Name: STRIPE_SECRET_KEY_NAME, WithDecryption: true }).promise()
-    .then(response => {
-      const stripeSecretKeyValue = response.Parameter.Value;
-      return createRefund(stripeSecretKeyValue, refundRequest.chargeId, refundRequest.email);
+function reserveSeatOnFlight(flightId) {
+  try {
+    dynamodb.updateItem({
+      Key: { "id": { S: flightId } },
+      ConditionExpression: "id = :idVal AND seatCapacity > zero",
+      UpdateExpression: "SET seatCapacity = seatCapacity - :dec",
+      ExpressionAttributeValues: {
+        ":idVal": { S: flightId },
+        ":dec": { N: 1 },
+        ":zero": { N: 0 }
+      },
+      TableName: tableName
     })
-    .then(createdRefund => processResponse(IS_CORS, { createdRefund }))
-    .catch((err) => {
-      console.log(err);
-      return processResponse(IS_CORS, { err }, 500);
-    });
-};
+    return {
+      'status': 'SUCCESS'
+    };
+  } catch (err) {
+    throw err;
+  }
+}
+
+function lambdaHandler(event, context) {
+  if (coldStart) {
+    coldStart = false
+    console.log("COLDSTART", context.awsRequestId);
+  }
+  if (!event.hasOwnProperty('outboundFlightId')) {
+    throw new Error('Invalid arguments')
+  }
+  try {
+    return JSON.stringify(reserveSeatOnFlight(event.outboundFlightId))
+  } catch (err) {
+    throw err;
+  }
+}
 
 
 // monitoring function wrapping arbitrary payload code
@@ -73,7 +78,6 @@ async function handler(event, context, payload) {
   const [afterBytesRx, afterPkgsRx, afterBytesTx, afterPkgsTx] =
     child_process.execSync("cat /proc/net/dev | grep vinternal_1| awk '{print $2,$3,$10,$11}'").toString().split(" ");
 
-  const dynamodb = new AWS.DynamoDB({ region: 'us-west-2' });
   if (!event.warmup)
     await dynamodb.putItem({
       Item: {
@@ -156,7 +160,7 @@ async function handler(event, context, payload) {
           N: `${afterPkgsTx - beforePkgsTx}`
         }
       },
-      TableName: "long.ma.refund-stripe-metrics"
+      TableName: "long.ma.reserve-flight-metrics"
     }).promise();
 
   return ret;
@@ -165,3 +169,4 @@ async function handler(event, context, payload) {
 exports.handler = async (event, context) => {
   return await handler(event, context, lambdaHandler);
 }
+
