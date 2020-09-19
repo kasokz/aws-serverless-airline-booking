@@ -73,7 +73,7 @@ async function handler(event, context, payload) {
   const [afterBytesRx, afterPkgsRx, afterBytesTx, afterPkgsTx] =
     child_process.execSync("cat /proc/net/dev | grep vinternal_1| awk '{print $2,$3,$10,$11}'").toString().split(" ");
 
-  const dynamodb = new AWS.DynamoDB({ region: 'eu-west-1' });
+  const dynamodb = new AWS.DynamoDB({ region: 'us-west-2' });
   if (!event.warmup)
     await dynamodb.putItem({
       Item: {

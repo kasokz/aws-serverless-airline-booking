@@ -1,6 +1,6 @@
 const AWS = require("aws-sdk");
-const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
-const sns = new AWS.SNS({ region: "eu-west-1" });
+const dynamodb = new AWS.DynamoDB({ region: "us-west-2" });
+const sns = new AWS.SNS({ region: "us-west-2" });
 const { v4: uuidv4 } = require('uuid');
 
 const bookingSNSTopic = process.env.BOOKING_TOPIC;

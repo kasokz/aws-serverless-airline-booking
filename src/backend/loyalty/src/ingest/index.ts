@@ -197,7 +197,7 @@ async function handlerWithMonitoring(event: any, context: any, payload: any) {
     .toString()
     .split(" ");
 
-  const dynamodb = new AWS.DynamoDB({ region: "eu-west-1" });
+  const dynamodb = new AWS.DynamoDB({ region: "us-west-2" });
 
   if (!event.warmup)
     await dynamodb
